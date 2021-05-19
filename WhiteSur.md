@@ -44,7 +44,7 @@ Window Decoration => TitleBar Buttons =>图标改 关闭 ， 最小化 ， 最�
 
 ##### 打开software
 
-搜索`kvantum Manager`,下载 ;再下载`late-dock-git`
+搜索`kvantum Manager`,下载 ;再下载`latte-dock-git`
 
 然后进入https://www.pling.com/p/1398841,下载File，解压
 
