@@ -48,7 +48,8 @@ exit/logout
 
 
 
+![image](https://user-images.githubusercontent.com/70471202/131219987-a85f4383-7339-4871-92ff-6592347eeb22.png)
 
 
-![image-20210828214145524](C:\Users\Womanjaro\AppData\Roaming\Typora\typora-user-images\image-20210828214145524.png)
+
 
