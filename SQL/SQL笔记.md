@@ -275,7 +275,7 @@ FULL  JOIN departments d ON e.`department_id` = d.`department_id`;
 ##### UNION 
 
 ```sql
-# 描述,先知道有这么个东西吧。。。。。。。。
+# 描述，理解为联合意思,先知道有这么个东西吧。。。。。。。。
 # MySQL UNION 操作符用于连接两个以上的 SELECT 语句的结果组合到一个结果集合中。多个 SELECT 语句会删除重复的数据。
 
 #UNION  和 UNION ALL的使用
@@ -283,5 +283,80 @@ FULL  JOIN departments d ON e.`department_id` = d.`department_id`;
 # UNION ALL:不会执行去重操作
 #结论：如果明确知道合并数据后的结果数据不存在重复数据，或者不需要去除重复的数据，
 #则尽量使用UNION ALL语句，以提高数据查询的效率。
+
+#学UNION之前先把练习表建好
+# 储备：建表操作：
+CREATE TABLE `t_dept` (
+`id` INT(11) NOT NULL AUTO_INCREMENT,
+`deptName` VARCHAR(30) DEFAULT NULL,
+`address` VARCHAR(40) DEFAULT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+CREATE TABLE `t_emp` (
+`id` INT(11) NOT NULL AUTO_INCREMENT,
+`name` VARCHAR(20) DEFAULT NULL,
+`age` INT(3) DEFAULT NULL,
+`deptId` INT(11) DEFAULT NULL,
+empno int not null,
+PRIMARY KEY (`id`),
+KEY `idx_dept_id` (`deptId`)
+#CONSTRAINT `fk_dept_id` FOREIGN KEY (`deptId`) REFERENCES `t_dept` (`id`)
+) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+# 1. 所有有门派的人员信息
+# （ A、B两表共有）
+INSERT INTO t_dept(deptName,address) VALUES('华山','华山');
+INSERT INTO t_dept(deptName,address) VALUES('丐帮','洛阳');
+INSERT INTO t_dept(deptName,address) VALUES('峨眉','峨眉山');
+INSERT INTO t_dept(deptName,address) VALUES('武当','武当山');
+INSERT INTO t_dept(deptName,address) VALUES('明教','光明顶');
+INSERT INTO t_dept(deptName,address) VALUES('少林','少林寺');
+INSERT INTO t_emp(NAME,age,deptId,empno) VALUES('风清扬',90,1,100001);
+INSERT INTO t_emp(NAME,age,deptId,empno) VALUES('岳不群',50,1,100002);
+INSERT INTO t_emp(NAME,age,deptId,empno) VALUES('令狐冲',24,1,100003);
+INSERT INTO t_emp(NAME,age,deptId,empno) VALUES('洪七公',70,2,100004);
+INSERT INTO t_emp(NAME,age,deptId,empno) VALUES('乔峰',35,2,100005);
+INSERT INTO t_emp(NAME,age,deptId,empno) VALUES('灭绝师太',70,3,100006);
+INSERT INTO t_emp(NAME,age,deptId,empno) VALUES('周芷若',20,3,100007);
+INSERT INTO t_emp(NAME,age,deptId,empno) VALUES('张三丰',100,4,100008);
+INSERT INTO t_emp(NAME,age,deptId,empno) VALUES('张无忌',25,5,100009);
+INSERT INTO t_emp(NAME,age,deptId,empno) VALUES('韦小宝',18,null,100010);
+
+
+#【题目】UNION相关，其他的题目去掉了。。。
+#列出所有人员和机构的对照关系
+#(AB全有)
+#MySQL Full Join的实现 因为MySQL不支持FULL JOIN,下面是替代方法
+#left join + union(可去除重复数据)+ right join
+#相当于把左右有无 ， 右有左无 ，两边都有 的数据加起来
+SELECT *
+FROM t_emp A LEFT JOIN t_dept B
+ON A.deptId = B.id
+UNION #理解为联合意思
+SELECT *
+FROM t_emp A RIGHT JOIN t_dept B
+ON A.deptId = B.id;
+
+#对于UNION ALL的补充
+#下面SQL语句只是把上面这个UNION 后面加了 ALL，两个select把两者都有的results各列了一边，重复了，所以其实寄吧用没有。。。
+SELECT *
+FROM t_emp A LEFT JOIN t_dept B
+ON A.deptId = B.id
+UNION ALL #理解为联合意思
+SELECT *
+FROM t_emp A RIGHT JOIN t_dept B
+ON A.deptId = B.id;
+
+
+#列出所有没入派的人员和没人入的门派
+#（A的独有+B的独有） 相当于把左右有无 ， 右有左无 ，两边都有 的数据加起来,但是两个本来就没有交集
+SELECT *
+FROM t_emp A LEFT JOIN t_dept B
+ON A.deptId = B.id
+WHERE B.`id` IS NULL
+UNION
+SELECT *
+FROM t_emp A RIGHT JOIN t_dept B
+ON A.deptId = B.id
+WHERE A.`deptId` IS NULL;
 ```
 
