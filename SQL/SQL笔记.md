@@ -174,3 +174,114 @@ LIMIT 2 OFFSET 31; #注意offset的不算入 => 32 ~ 33
 
 ```
 
+##### 连接条件
+
+```sql
+#云家园对线群一般都是left join，下方自连接与非自连接
+#下面是where加连接条件
+
+#出现笛卡尔积的错误
+#错误的原因：缺少了多表的连接条件
+#错误的实现方式：每个员工都与每个部门匹配了一遍。
+SELECT employee_id,department_name #前表107条，后表27条件记录
+FROM employees,departments;  #查询出2889 => 107*27 条记录
+
+#多表查询的正确方式：需要有连接条件
+SELECT employee_id,department_name
+FROM employees,departments
+#两个表的连接条件
+WHERE employees.`department_id` = departments.department_id;
+
+#建议：从sql优化的角度，建议多表查询时，每个字段前都指明其所在的表。
+
+#如果查询语句中出现了多个表中都存在的字段，则必须指明此字段所在的表。
+#可以给表起别名，在SELECT和WHERE中使用表的别名。#where中不能用select中列字段的别名，查看上方 别名 处笔记
+#如果给表起了别名，在SELECT或WHERE中使用表名的话，必须使用表的别名，而不能再使用表的原名。
+SELECT emp.employee_id,dep.department_name,emp.department_id
+FROM employees emp ,deprtments dep
+WHERE emp.`department_id` = dep.department_id;
+
+#结论：如果有n个表实现多表的查询，则需要至少n-1个连接条件
+#练习：查询员工的employee_id,last_name,department_name,city
+SELECT e.employee_id,e.last_name,d.department_name,l.city,e.department_id,l.location_id
+FROM employees e,departments d,locations l
+WHERE e.`department_id` = d.`department_id` and d.`location_id` = l.`location_id`;
+```
+
+##### LEFT,RIGRHT,INNER JOIN
+
+```sql
+#自连接  vs  非自连接
+
+#自连接的例子：
+#练习：查询员工id,员工姓名及其管理者的id和姓名
+SELECT emp.employee_id,emp.last_name,mgr.employee_id,mgr.last_name
+FROM employees emp ,employees mgr
+WHERE emp.`manager_id` = mgr.`employee_id`;
+
+
+#内连接  vs  外连接
+#内连接：合并具有同一列的两个以上的表的行, 结果集中不包含一个表与另一个表不匹配的行，前面的废话意思就是自己查自己
+SELECT employee_id,department_name
+FROM employees e,departments d
+WHERE e.`department_id` = d.department_id;
+#SQL99语法 INNER JOIN (可以忽略INNER，直接写 JOIN也是一样的效果) 实现上方内连接： 
+SELECT last_name,department_name
+FROM employees e
+INNER JOIN departments d
+ON e.`department_id` = d.`department_id`;
+
+#外连接：合并具有同一列的两个以上的表的行, 结果集中除了包含一个表与另一个表匹配的行之外，
+#还查询到了左表 或 右表中不匹配的行。不难，结合下方例子理解
+
+# 外连接的分类：左外连接、右外连接、满外连接
+# 左外连接：两个表在连接过程中除了返回满足连接条件的行以外还返回左表中不满足条件的行，这种连接称为左外连接。
+# 右外连接：两个表在连接过程中除了返回满足连接条件的行以外还返回右表中不满足条件的行，这种连接称为右外连接。
+
+#练习：查询所有的员工的last_name,department_name信息，
+
+#错误写法
+#既然是所有的员工，可能没有部门名字，名字左表有记录，而右表部门名无
+SELECT last_name,department_name
+FROM employees e,departments d
+WHERE e.`department_id` = d.department_id;   # 这是有名字和部门名的 (106 results) ，需要使用左外连接配对所有
+#与上方等价的JOIN / INNER JOIN 写法 (106 results)
+SELECT last_name,department_name
+FROM employees e
+JOIN departments d  ON e.`department_id` = d.department_id;   #这是有名字和部门名的，需要使用左外连接
+
+#正确写法
+#左外连接 LEFT JOIN (是LEFT OUTER JOIN的简写)
+#使用左外连接，我们多查到了一条有名字而没有部门名的可怜打工人 (107 results)
+SELECT last_name,department_name
+FROM employees e
+LEFT JOIN departments d  ON e.`department_id` = d.department_id;  
+
+
+#右外连接：RIGHT JOIN (RGIHT OUTER JOIN的简写)
+#使用右外连接，我们多查到了一些空有部门名而没有分配员工的寄吧部门名 (122 results)
+SELECT last_name,department_name
+FROM employees e 
+RIGHT OUTER JOIN departments d ON e.`department_id` = d.`department_id`;
+
+
+#满外连接：mysql不支持FULL OUTER JOIN，故下方语法MySQL跑不了
+#满外连接是上面左右外连接的结合，相当于把结果全部显示，没有值的字段为NULL
+SELECT last_name,department_name
+FROM employees e
+FULL  JOIN departments d ON e.`department_id` = d.`department_id`;
+```
+
+##### UNION 
+
+```sql
+# 描述,先知道有这么个东西吧。。。。。。。。
+# MySQL UNION 操作符用于连接两个以上的 SELECT 语句的结果组合到一个结果集合中。多个 SELECT 语句会删除重复的数据。
+
+#UNION  和 UNION ALL的使用
+# UNION：会执行去重操作
+# UNION ALL:不会执行去重操作
+#结论：如果明确知道合并数据后的结果数据不存在重复数据，或者不需要去除重复的数据，
+#则尽量使用UNION ALL语句，以提高数据查询的效率。
+```
+
