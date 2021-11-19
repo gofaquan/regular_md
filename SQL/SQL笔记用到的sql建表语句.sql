@@ -1,9 +1,3 @@
-/*
-SQLyog Ultimate v12.08 (64 bit)
-MySQL - 5.7.28-log : Database - atguigudb
-*********************************************************************
-*/
-
 /*!40101 SET NAMES utf8 */;
 
 /*!40101 SET SQL_MODE=''*/;
